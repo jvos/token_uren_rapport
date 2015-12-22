@@ -1,0 +1,5 @@
+name = Token Uren Rapport
+description = Custom tokens for the hour report link.
+core = 7.x
+package = Custom
+;dependencies[] = token

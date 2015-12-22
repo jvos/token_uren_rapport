@@ -1,0 +1,80 @@
+<?php
+/*function token_uren_rapport_schema_alter(&$schema = array()) {
+
+  // Initialize flag to prevent recursion.
+  $altering = &drupal_static(__FUNCTION__);
+  if (!isset($altering)) {
+    $altering = FALSE;
+  }
+
+  if (!$altering) {
+    // Prevent recursion
+    $altering = TRUE;
+
+    // Force rebuilding
+    drupal_static_reset('entity_get_info');
+    $entity_info = entity_get_info();
+
+    $altering = FALSE;
+
+    foreach ($entity_info as $entity_type => $info) {
+      if (isset($info['uuid']) && $info['uuid'] == TRUE && !empty($info['entity keys']['uuid'])) {
+        // Add the Universally Unique Identifier column to the definition.
+        uuid_schema_generate($schema, $info['base table'], $info['entity keys']['uuid']);
+        if (!empty($info['revision table']) && !empty($info['entity keys']['revision uuid'])) {
+          // Add the Universally Unique Version Identifier to the definition.
+          uuid_schema_generate($schema, $info['revision table'], $info['entity keys']['revision uuid']);
+        }
+       }
+     }
+   }
+}*/
+
+
+/**
+ * Implements hook_token_info(). This hook will register tow token lname and fname.
+ */
+function token_uren_rapport_token_info() {
+  $info['tokens']['custom']['year'] = array(
+    'name' => t('Year'),
+    'description' => t('Current year.'),
+  );
+  $info['tokens']['custom']['week'] = array(
+    'name' => t('Week'),
+    'description' => t('Current week.'),
+  );
+  $info['tokens']['custom']['output-target'] = array(
+    'name' => t('Output Target'),
+    'description' => t('Output target (table/html;page-mode=stream)'),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_tokens(). This hook will operate the token and replace it with it's value.
+ */
+function token_uren_rapport_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  $sanitize = !empty($options['sanitize']);
+
+  if ($type == 'custom') {
+    foreach ($tokens as $name => $original) {
+      switch($name){
+        case 'year':
+          $replacements[$original] = date('Y');
+          break;
+        case 'week':
+          $replacements[$original] = date('W');
+          break;
+        case 'output-target':
+          $replacements[$original] = rawurlencode('table/html;page-mode=stream');
+        break;
+        default:
+          if (array_key_exists($name, $data)) {
+            $replacements[$original] = $data[$name];    
+          }
+      }
+    }
+  }
+  return $replacements;
+}
